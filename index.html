@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موسسه خیریه رفاه یتیم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root{
+            --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3248;
+            --gold:#c9a84c; --gold2:#e8c97a; --teal:#3ecfcf; --red:#e05a6b;
+            --green:#4caf8a; --blue:#5b8cf5; --text:#e8eaf0; --text2:#9ba3bf;
+            --radius:12px;
+        }
+        *{box-sizing:border-box; margin:0; padding:0;}
+        body{background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh;}
+        body.rtl{font-family:'Vazirmatn',sans-serif; direction:rtl;}
+
+        /* Login */
+        #loginPage{position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9000;}
+        .login-card{background:var(--surface); padding:2.5rem; border-radius:16px; width:100%; max-width:400px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+        .login-logo{font-size:3rem; margin-bottom:1rem;}
+        input{width:100%; padding:14px; margin:10px 0; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:1rem;}
+        button{width:100%; padding:14px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#1a1200; border:none; border-radius:8px; font-weight:700; font-size:1.1rem; cursor:pointer;}
+
+        /* Main App */
+        #app{display:none;}
+        .sidebar{position:fixed; left:0; top:0; bottom:0; width:260px; background:var(--surface); border-left:1px solid var(--border); padding:1rem 0;}
+        .main{margin-right:260px; padding:1.5rem;}
+
+        .nav-item{padding:0.8rem 1.5rem; cursor:pointer; color:var(--text2);}
+        .nav-item:hover, .nav-item.active{background:rgba(201,168,76,0.1); color:var(--gold);}
+
+        .section{display:none;}
+        .section.active{display:block;}
+
+        table{width:100%; border-collapse:collapse; margin-top:1rem;}
+        th, td{padding:12px; text-align:right; border-bottom:1px solid var(--border);}
+        th{background:var(--surface2);}
+
+        .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#1a1200; padding:10px 16px; border:none; border-radius:8px; cursor:pointer;}
+        .badge-good{color:var(--green); font-weight:bold;}
+        .badge-danger{color:var(--red); font-weight:bold;}
+    </style>
+</head>
+<body>
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="loginPage">
+    <div class="login-card">
+        <div class="login-logo">🕌</div>
+        <h1 style="margin-bottom:8px;">رفاه یتیم</h1>
+        <p style="color:var(--text2); margin-bottom:2rem;">سیستم مدیریت موسسه خیریه</p>
+        
+        <input type="text" id="username" placeholder="نام کاربری" value="admin">
+        <input type="password" id="password" placeholder="رمز عبور" value="1234">
+        <button onclick="handleLogin()">ورود به سیستم</button>
+        
+        <p style="margin-top:15px; font-size:0.85rem; color:var(--text2);">admin / 1234</p>
+    </div>
+</div>
+
+<!-- ==================== MAIN APPLICATION ==================== -->
+<div id="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div style="padding:1.5rem; text-align:center; border-bottom:1px solid var(--border);">
+            <h2 style="color:var(--gold);">رفاه یتیم</h2>
+        </div>
+        <div class="nav-item active" onclick="showSection('dashboard')">📊 داشبورد</div>
+        <div class="nav-item" onclick="showSection('orphans')">👦 یتیمان</div>
+        <div class="nav-item" onclick="showSection('scores')">📝 نمرات</div>
+        <div class="nav-item" onclick="showSection('finance')">💰 مالی</div>
+        <div class="nav-item" onclick="showSection('books')">📚 کتابخانه</div>
+        <div class="nav-item" onclick="logout()" style="margin-top:auto; color:var(--red);">🚪 خروج</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="section active">
+            <h1>داشبورد مدیریت</h1>
+            <p>خوش آمدید به سیستم مدیریت موسسه خیریه رفاه یتیم</p>
+        </div>
+
+        <!-- Orphans Section -->
+        <div id="orphans" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2>یتیمان</h2>
+                <button class="btn-primary" onclick="alert('افزودن یتیم جدید - بعداً کامل می‌شود')">+ یتیم جدید</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>نام</th>
+                        <th>نام پدر</th>
+                        <th>سن</th>
+                        <th>صنف</th>
+                        <th>کلاس</th>
+                        <th>شماره ولی</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="orphans-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Finance Section -->
+        <div id="finance" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2>تراکنش‌های مالی</h2>
+                <button class="btn-primary" onclick="openFinanceModal()">+ ثبت تراکنش جدید</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>نوع</th>
+                        <th>مبلغ</th>
+                        <th>توضیحات</th>
+                    </tr>
+                </thead>
+                <tbody id="finance-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Books Section -->
+        <div id="books" class="section">
+            <h2>کتابخانه و موجودی کتب</h2>
+            <p>بخش کتابخانه در حال توسعه است...</p>
+        </div>
+
+        <!-- Scores Section -->
+        <div id="scores" class="section">
+            <h2>نمرات دانش‌آموزان</h2>
+            <p>بخش نمرات در حال توسعه است...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Finance Modal -->
+<div id="finModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:var(--surface); padding:2rem; border-radius:12px; width:100%; max-width:450px;">
+        <h3>ثبت تراکنش مالی</h3>
+        <select id="finModalType" style="width:100%; padding:12px; margin:10px 0;">
+            <option value="income">درآمد</option>
+            <option value="expense">مصرف</option>
+        </select>
+        <input type="date" id="fin-date" style="width:100%; padding:12px; margin:10px 0;">
+        <input type="number" id="fin-amount" placeholder="مبلغ (افغانی)" style="width:100%; padding:12px; margin:10px 0;">
+        <input type="text" id="fin-desc" placeholder="توضیحات" style="width:100%; padding:12px; margin:10px 0;">
+        
+        <div style="margin-top:15px; display:flex; gap:10px;">
+            <button class="btn-primary" onclick="saveFinance()" style="flex:1;">ذخیره</button>
+            <button onclick="closeModal('finModal')" style="flex:1; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px;">انصراف</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+async function handleLogin(){
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({username,password})
+  });
+
+  const data = await res.json();
+
+  if(data.success){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("app").style.display="block";
+  }else{
+    alert("Invalid login");
+  }
+}
+</script>
+
+</body>
+</html>
